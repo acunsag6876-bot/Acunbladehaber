@@ -1,0 +1,472 @@
+<!DOCTYPE html><!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ACUN BLADE Haber Sitesi</title>
+<style>
+  /* Reset ve font */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin:0; padding:0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9f9f9;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  body.dark {
+    background: #121212;
+    color: #eee;
+  }
+  header {
+    background: linear-gradient(90deg, #0078d7 0%, #00b0ff 100%);
+    color: white;
+    padding: 25px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  }
+  header h1 {
+    margin:0;
+    font-weight: 900;
+    font-size: 2.4rem;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    flex: 1 1 100%;
+    text-align: center;
+  }
+  nav {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex: 1 1 100%;
+    margin-top: 15px;
+  }
+  nav button {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    min-width: 90px;
+  }
+  nav button:hover, nav button.active {
+    background: white;
+    color: #0078d7;
+    border-color: white;
+    box-shadow: 0 0 8px rgba(255,255,255,0.7);
+  }
+  #darkModeToggle {
+    background: #ffcb05;
+    color: #222;
+    font-weight: 900;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+  }
+  #darkModeToggle:hover {
+    background: #e0b704;
+  }
+  main {
+    max-width: 960px;
+    margin: 25px auto 40px;
+    padding: 0 15px 40px;
+  }
+  .search-container {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+  }
+  .search-container input[type="text"] {
+    flex-grow: 1;
+    max-width: 600px;
+    padding: 12px 18px;
+    border-radius: 30px 0 0 30px;
+    border: 2px solid #0078d7;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  .search-container input[type="text"]:focus {
+    border-color: #00b0ff;
+  }
+  .search-container button {
+    padding: 12px 25px;
+    border: 2px solid #0078d7;
+    background: #0078d7;
+    color: white;
+    font-weight: 700;
+    border-radius: 0 30px 30px 0;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+  }
+  .search-container button:hover {
+    background: #005a9e;
+    border-color: #005a9e;
+  }
+  .articles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 22px;
+  }
+  .article {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 14px rgb(0 0 0 / 0.1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s;
+  }
+  body.dark .article {
+    background: #222;
+    box-shadow: 0 3px 20px rgb(0 0 0 / 0.7);
+  }
+  .article:hover {
+    box-shadow: 0 6px 28px rgb(0 0 0 / 0.2);
+  }
+  .article img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .article:hover img {
+    transform: scale(1.05);
+  }
+  .article-content {
+    padding: 18px 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .article-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    flex-grow: 0;
+    color: #0078d7;
+    text-decoration: underline;
+  }
+  body.dark .article-title {
+    color: #00b0ff;
+  }
+  .article-excerpt {
+    flex-grow: 1;
+    font-size: 1rem;
+    color: #555;
+  }
+  body.dark .article-excerpt {
+    color: #bbb;
+  }
+  .article-date {
+    font-size: 0.85rem;
+    margin-top: 15px;
+    color: #888;
+    font-weight: 600;
+    text-align: right;
+  }
+  body.dark .article-date {
+    color: #999;
+  }
+  /* Haber detay ekranı */
+  .detail-view {
+    max-width: 720px;
+    margin: 30px auto;
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 24px rgb(0 0 0 / 0.15);
+    display: none;
+  }
+  body.dark .detail-view {
+    background: #222;
+    box-shadow: 0 5px 24px rgb(0 0 0 / 0.7);
+  }
+  .detail-view img {
+    width: 100%;
+    max-height: 360px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgb(0 0 0 / 0.2);
+  }
+  .detail-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    color: #0078d7;
+  }
+  body.dark .detail-title {
+    color: #00b0ff;
+  }
+  .detail-date {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  body.dark .detail-date {
+    color: #bbb;
+  }
+  .detail-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #333;
+  }
+  body.dark .detail-content {
+    color: #ddd;
+  }
+  /* Butonlar ve toggler */
+  .btn {
+    background: #0078d7;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.15);
+  }
+  .btn:hover {
+    background: #005a9e;
+  }
+  .btn-toggle {
+    background: #ffcb05;
+    color: #222;
+    font-weight: 900;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.25);
+    transition: background-color 0.3s ease;
+  }
+  .btn-toggle:hover {
+    background: #e0b704;
+  }
+  /* Responsive */
+  @media (max-width: 768px) {
+    .articles {
+      grid-template-columns: 1fr 1fr;
+    }
+    nav {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+  }
+  @media (max-width: 480px) {
+    .articles {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="logo">ACUN BLADE Haber</h1>
+  <nav id="categoryNav">
+    <button class="active" data-category="all">Tümü</button>
+    <button data-category="gundem">Gündem</button>
+    <button data-category="spor">Spor</button>
+    <button data-category="magazin">Magazin</button>
+    <button data-category="teknoloji">Teknoloji</button>
+    <button data-category="ekonomi">Ekonomi</button>
+  </nav>
+  <button id="darkModeToggle" class="btn-toggle" title="Karanlık Modu Aç/Kapat">🌙</button>
+</header>
+
+<main>
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Haberlerde ara..." />
+    <button id="searchBtn" class="btn">Ara</button>
+  </div>
+
+  <section id="articles" class="articles"></section>
+
+  <section id="detailView" class="detail-view" style="display:none;">
+    <button id="backBtn" class="btn" style="margin-bottom:20px;">← Geri</button>
+    <img id="detailImg" src="" alt="Haber Görseli" />
+    <h2 id="detailTitle" class="detail-title"></h2>
+    <div id="detailDate" class="detail-date"></div>
+    <div id="detailContent" class="detail-content"></div>
+  </section>
+</main>
+
+<script>
+  // 100 haber örneği (resimleri Picsum.photos kullanıldı)
+  const haberler = [];
+
+  const kategoriler = ["gundem", "spor", "magazin", "teknoloji", "ekonomi"];
+
+  // Rastgele tarih üret (son 60 gün içinde)
+  function rastgeleTarih() {
+    const bugun = new Date();
+    const gunFarki = Math.floor(Math.random() * 60);
+    bugun.setDate(bugun.getDate() - gunFarki);
+    return bugun.toISOString().split('T')[0];
+  }
+
+  // Rastgele başlık oluştur (kategori bazlı basit)
+  function baslikUret(kategori, i) {
+    switch(kategori) {
+      case "gundem": return `Gündem Haberi #${i+1}`;
+      case "spor": return `Spor Haberi #${i+1}`;
+      case "magazin": return `Magazin Haberi #${i+1}`;
+      case "teknoloji": return `Teknoloji Haberi #${i+1}`;
+      case "ekonomi": return `Ekonomi Haberi #${i+1}`;
+      default: return `Haber #${i+1}`;
+    }
+  }
+
+  // Rastgele özet üret
+  function ozetUret(kategori, i) {
+    return `Bu, ${baslikUret(kategori, i).toLowerCase()} için kısa bir özet metnidir.`;
+  }
+
+  // Rastgele içerik üret
+  function icerikUret(kategori, i) {
+    return `Detaylı içerik: ${baslikUret(kategori, i)}. Bu içerik haberin tam metnidir ve ${kategori} kategorisine aittir. Burada güncel bilgiler paylaşılmaktadır.`;
+  }
+
+  for(let i=0; i<100; i++) {
+    const kategori = kategoriler[i % kategoriler.length];
+    haberler.push({
+      id: i+1,
+      kategori: kategori,
+      baslik: baslikUret(kategori, i),
+      ozet: ozetUret(kategori, i),
+      icerik: icerikUret(kategori, i),
+      tarih: rastgeleTarih(),
+      resim: `https://picsum.photos/id/${100 + i}/600/400`
+    });
+  }
+
+  // Elementler
+  const articlesEl = document.getElementById("articles");
+  const detailViewEl = document.getElementById("detailView");
+  const detailImgEl = document.getElementById("detailImg");
+  const detailTitleEl = document.getElementById("detailTitle");
+  const detailDateEl = document.getElementById("detailDate");
+  const detailContentEl = document.getElementById("detailContent");
+  const backBtn = document.getElementById("backBtn");
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const categoryNav = document.getElementById("categoryNav");
+  const logo = document.getElementById("logo");
+  const darkModeToggle = document.getElementById("darkModeToggle");
+
+  let currentCategory = "all";
+
+  function listeleHaberler(kategori = "all", ara = "") {
+    articlesEl.innerHTML = "";
+    let filtred = haberler.filter(haber => {
+      if(kategori !== "all" && haber.kategori !== kategori) return false;
+      if(ara && !haber.baslik.toLowerCase().includes(ara.toLowerCase()) && !haber.ozet.toLowerCase().includes(ara.toLowerCase())) return false;
+      return true;
+    });
+
+    if(filtred.length === 0) {
+      articlesEl.innerHTML = "<p>Aradığınız kriterlere uygun haber bulunamadı.</p>";
+      return;
+    }
+
+    filtred.sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
+
+    filtred.forEach(haber => {
+      const div = document.createElement("div");
+      div.className = "article";
+      div.setAttribute("data-id", haber.id);
+      div.innerHTML = `
+        <img src="${haber.resim}" alt="${haber.baslik}" />
+        <div class="article-content">
+          <h3 class="article-title">${haber.baslik}</h3>
+          <p class="article-excerpt">${haber.ozet}</p>
+          <div class="article-date">${new Date(haber.tarih).toLocaleDateString()}</div>
+        </div>
+      `;
+      div.addEventListener("click", () => detayGoster(haber.id));
+      articlesEl.appendChild(div);
+    });
+  }
+
+  function detayGoster(id) {
+    const haber = haberler.find(h => h.id === id);
+    if(!haber) return;
+    detailImgEl.src = haber.resim;
+    detailTitleEl.textContent = haber.baslik;
+    detailDateEl.textContent = new Date(haber.tarih).toLocaleDateString();
+    detailContentEl.textContent = haber.icerik;
+    detailViewEl.style.display = "block";
+    articlesEl.style.display = "grid";
+    articlesEl.style.display = "none";
+    searchInput.style.display = "none";
+    searchBtn.style.display = "none";
+  }
+
+  backBtn.addEventListener("click", () => {
+    detailViewEl.style.display = "none";
+    articlesEl.style.display = "grid";
+    searchInput.style.display = "block";
+    searchBtn.style.display = "inline-block";
+  });
+
+  categoryNav.addEventListener("click", (e) => {
+    if(e.target.tagName !== "BUTTON") return;
+    currentCategory = e.target.getAttribute("data-category");
+    [...categoryNav.querySelectorAll("button")].forEach(btn => btn.classList.remove("active"));
+    e.target.classList.add("active");
+    listeleHaberler(currentCategory, searchInput.value.trim());
+  });
+
+  searchBtn.addEventListener("click", () => {
+    listeleHaberler(currentCategory, searchInput.value.trim());
+  });
+
+  searchInput.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") {
+      listeleHaberler(currentCategory, searchInput.value.trim());
+    }
+  });
+
+  logo.addEventListener("click", () => {
+    currentCategory = "all";
+    [...categoryNav.querySelectorAll("button")].forEach(btn => btn.classList.remove("active"));
+    categoryNav.querySelector("button[data-category='all']").classList.add("active");
+    searchInput.value = "";
+    listeleHaberler();
+  });
+
+  darkModeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+  });
+
+  listeleHaberler();
+</script>
+
+</body>
+</html>
+<html>
+<head>
+<title>New File</title>
+</head>
+<body>
+<h1>Hello World</h1>
+</body>
+</html>
